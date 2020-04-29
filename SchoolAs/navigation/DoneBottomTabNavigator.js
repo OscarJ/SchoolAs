@@ -10,25 +10,18 @@ import { Button } from 'react-native';
 const BottomTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = 'Home';
 
-export default function BottomTabNavigator({ navigation, route }) {
+export default function PendingBottomTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
   // currently active tab. Learn more in the documentation:
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
   navigation.setOptions({ headerTitle: getHeaderTitle(route) });
   return (
     <BottomTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
-      <BottomTab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Estudiante',
-          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="md-code-working" />,
-        }}
-      />
       {SchoolService.studentinfo.schools && SchoolService.studentinfo.schools.map(x => {
         return(
           <BottomTab.Screen
             name={x}
+            key={x.replace(' ','_')}
             component={SubjectScreen}
             options={{
               title: x,
@@ -46,7 +39,7 @@ function getHeaderTitle(route) {
 
   switch (routeName) {
     case 'Home':
-      return 'Estudiante';
+      return 'Completados';
     default:
       return routeName;
   }
