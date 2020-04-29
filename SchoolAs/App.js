@@ -4,29 +4,40 @@ import { SplashScreen } from 'expo';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 
-import BottomTabNavigator from './navigation/BottomTabNavigator';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
 import useLinking from './navigation/useLinking';
 import { SchoolService } from './services/schoolService';
+import PendingScreen from './screens/PendingScreen';
+import DoneScreen from './screens/DoneScreen';
+import HomeScreen from './screens/HomeScreen';
+import ExitScreen from './screens/ExitScreen';
+import ReloadScreen from './screens/ReloadScreen';
+import AssignmentScreen from './screens/AssignmentScreen';
 
-const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
-  const [studentId, setStudenId] = React.useState(undefined);
   const [initialNavigationState, setInitialNavigationState] = React.useState();
-  const [studentInfo, setStudentInfo] = React.useState();
+  const [isUserAuthenticated, setUserAuthenticated] = React.useState(false);
+  const [currentAssignment, setAssignment] = React.useState(undefined);
+  const [classInfo, setClassInfo] = React.useState(undefined);
   const containerRef = React.useRef();
   const { getInitialState } = useLinking(containerRef);
-  const _schoolService = new SchoolService();
-  SchoolService.cleartstudent = setStudenId;
+  const _schoolService = SchoolService.createInstance();
+
+  _schoolService.setAssignmentFn(setAssignment);
+  _schoolService.setStateClassesFn(setClassInfo);
+
   let temporaryStudentId = '';
 
   const getInformation = function(id){
-    _schoolService.getStudentInfo(id, function(data){
-      if(data.Code === 0){
-        setStudentInfo(data.Items[0]);
+    _schoolService.getStudentInfo(id, function(success){
+      if(success){
+        console.log('c');
+        setUserAuthenticated(true);
       }
     });
   }
@@ -36,14 +47,13 @@ export default function App(props) {
   }
 
   const handleLogin = function(){
-    setStudenId(temporaryStudentId);
-    SchoolService.studentinfo.Id = temporaryStudentId;
+    getInformation(temporaryStudentId);
   }
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
     async function loadResourcesAndDataAsync() {
       try {
-        getInformation('121700597');
+        
         SplashScreen.preventAutoHide();
 
         // Load our initial navigation state
@@ -69,7 +79,7 @@ export default function App(props) {
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return null;
   } else {
-    if(!studentId){
+    if(!isUserAuthenticated){
      return (
       <View style={styles.setting}>
         <Image
@@ -81,12 +91,13 @@ export default function App(props) {
               style={styles.welcomeImage}
             />
         <TextInput 
+         style={{textAlign:'center'}}
           placeholder="Digite el numero de cedula del estudiante"
           keyboardType="number-pad"
           onChangeText={handleChange}/>
         <Button 
           title="Ingresar"
-          onPress={handleLogin}>
+          onPress={handleLogin}>3
         </Button>
       </View>);
     }
@@ -95,9 +106,14 @@ export default function App(props) {
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
           <NavigationContainer ref={containerRef} initialState={initialNavigationState}>
-            <Stack.Navigator>
-              <Stack.Screen name="Root" component={BottomTabNavigator} />
-            </Stack.Navigator>
+            <Drawer.Navigator initialRouteName="Home">
+              <Drawer.Screen name="Estudiante" component={HomeScreen} />
+              <Drawer.Screen name="Pendientes" component={PendingScreen} />
+              <Drawer.Screen name="Completados" component={DoneScreen} />
+              {currentAssignment && <Drawer.Screen name="Asignacion" component={() => <AssignmentScreen assignment={currentAssignment}/>} />}
+              <Drawer.Screen name="Recargar" component={ReloadScreen} onPress={()=>{console.log('asdf')}}/>
+              <Drawer.Screen name="Salir" component={ExitScreen} onPress={() => {}} />
+            </Drawer.Navigator>
           </NavigationContainer>
         </View>
     );

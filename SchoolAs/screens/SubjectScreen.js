@@ -1,34 +1,66 @@
-import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { List } from 'react-native-paper';
-import { RectButton, ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import { SchoolService } from '../services/schoolService';
 
+const _schoolService = SchoolService.createInstance();
 
 export default function SubjectScreen({ navigation, route }) {
   
+  const getColorBasedOnDate = function(date){
+    date = new Date(date);
+    var d = new Date();
+    d.setDate(d.getDate()-1);
+    if(!!!date || new Date() < date){
+      return 'green';
+    }
+    else if(d < date && date < new Date()){
+      return 'orange';
+    }
+    else{
+      return 'red';
+    }
+  }
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <List.Section title="Clases">
-      {SchoolService.studentinfo[route.name].map(x => {
+      {_schoolService.classInfo[route.name].map(x => {
         return (
           <List.Accordion
             title={x.Class}
-            left={props => <List.Icon {...props} icon="folder" />}
+            key={x.Class.replace(' ','_')}
+            description={x.Teacher}
+            left={props => <View style={{backgroundColor:'gray', borderRadius:45, padding:5}}><Text style={{color:'white', fontWeight:'bold'}}>{x.Count}</Text></View>}
           >
             {x.Subjects.map(y => {
               return (
                 <List.Accordion
                   title={y.Name}
-                  left={props => <List.Icon {...props} icon="chair-school" />}
+                  left={props => <View style={{backgroundColor:'gray', borderRadius:45, padding:5}}><Text style={{color:'white', fontWeight:'bold'}}>{y.Count}</Text></View>}
                 >
                   {y.Assignments.map(w => {
                     return (
                     <List.Item 
                       title={w.Name}
+                      key={w.Name.replace(' ', '_')}
                       description={w.Instructions}
+                      onPress={()=> {
+                        _schoolService.getAssignmentData(w.AssignmentId, function(data){
+                          console.log(data);
+                          
+                          _schoolService.setAssignment(data.Item);
+                          setTimeout(()=>{
+                            navigation.navigate('Asignacion');
+                          },100);
+                        });
+                      }}
+                      left={props => {
+                        return (
+                          <View style={{backgroundColor: getColorBasedOnDate(w.Deadline)}}>
+                            <Text style={{color:getColorBasedOnDate(w.Deadline)}}>a</Text>
+                          </View>);}}
                       right={props => <List.Icon {...props} icon="arrow-right-circle" />}
                     />
                     );

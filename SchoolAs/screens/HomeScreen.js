@@ -7,10 +7,11 @@ import { MonoText } from '../components/StyledText';
 import { SchoolService } from '../services/schoolService';
 
 export default class HomeScreen extends Component {
+  _schoolService = SchoolService.createInstance();
+
   constructor(){
     super();
   }
-  
 
   render() {
     return (
@@ -28,17 +29,15 @@ export default class HomeScreen extends Component {
           </View>
   
           <View style={styles.getStartedContainer}>
-            <DevelopmentModeNotice />
+            {/* <DevelopmentModeNotice /> */}
   
-            <Text style={styles.getStartedText}>{SchoolService.studentinfo.SchoolName}</Text>
+            {this._schoolService.studentinfo && <Text style={styles.getStartedText}>{`${this._schoolService.studentinfo.Name} ${this._schoolService.studentinfo.LastName}`}</Text>}
   
             <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-            <MonoText>asd</MonoText>
+            {this._schoolService.studentinfo && <MonoText>{this._schoolService.studentinfo.Id}</MonoText>}
             </View>
   
-            <Text style={styles.getStartedText}>
-              Change any of the text, save the file, and your app will automatically reload.
-            </Text>
+            {this._schoolService.studentinfo && <Text style={styles.getStartedText}>{this._schoolService.studentinfo.Email}</Text>}
           </View>
         </ScrollView>
       </View>
@@ -50,38 +49,6 @@ HomeScreen.navigationOptions = {
   header: null,
 };
 
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
-        Learn more
-      </Text>
-    );
-
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled: your app will be slower but you can use useful development
-        tools. {learnMoreButton}
-      </Text>
-    );
-  } else {
-    return (
-      <Text style={styles.developmentModeText}>
-        You are not in development mode: your app will run at full speed.
-      </Text>
-    );
-  }
-}
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/workflow/development-mode/');
-}
-
-function handleHelpPress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/get-started/create-a-new-app/#making-your-first-change'
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
