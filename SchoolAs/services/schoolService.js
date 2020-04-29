@@ -49,7 +49,7 @@ export class SchoolService {
                     fetch(that.getStudentClassSubject + id)
                         .then((response) => response.json())
                         .then((res) => {
-                            let result = res.Items.reduce((h, { Teacher, SchoolName, Class, Subjects, Count }) => {
+                            let result = res.Item.Pending.reduce((h, { Teacher, SchoolName, Class, Subjects, Count }) => {
                                 return Object.assign(h, { [SchoolName]:( h[SchoolName] || [] ).concat({Teacher, Class, Subjects, Count})})
                             }, {});
 
